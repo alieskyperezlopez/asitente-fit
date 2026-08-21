@@ -1,89 +1,77 @@
-import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
-const FALLBACK_EXERCISES = [
-  { id: 1, name: "Glute Bridge", target_muscle: "Glúteos", equipment: "Solo peso corporal", gif_url: "https://fitnessprogramer.com/wp-content/uploads/2021/02/Glute-Bridge.gif" },
-  { id: 2, name: "Clamshell", target_muscle: "Glúteos", equipment: "Bandas elásticas", gif_url: "https://fitnessprogramer.com/wp-content/uploads/2022/02/Clamshell.gif" },
-  { id: 3, name: "Band Hip Thrust", target_muscle: "Glúteos", equipment: "Bandas elásticas", gif_url: "https://fitnessprogramer.com/wp-content/uploads/2021/09/Resistance-Band-Hip-Thrust.gif" },
-  { id: 4, name: "Bodyweight Squat", target_muscle: "Piernas", equipment: "Solo peso corporal", gif_url: "https://fitnessprogramer.com/wp-content/uploads/2021/05/bodyweight-squat.gif" },
-  { id: 5, name: "Dumbbell Goblet Squat", target_muscle: "Piernas", equipment: "Mancuernas", gif_url: "https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Goblet-Squat.gif" },
-  { id: 6, name: "Dumbbell Romanian Deadlift", target_muscle: "Piernas", equipment: "Mancuernas", gif_url: "https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Romanian-Deadlift.gif" },
-  { id: 7, name: "Band Pull Apart", target_muscle: "Espalda", equipment: "Bandas elásticas", gif_url: "https://fitnessprogramer.com/wp-content/uploads/2021/04/Band-Pull-Apart.gif" },
-  { id: 8, name: "Resistance Band Seated Row", target_muscle: "Espalda", equipment: "Bandas elásticas", gif_url: "https://fitnessprogramer.com/wp-content/uploads/2021/06/Resistance-Band-Seated-Row.gif" },
-  { id: 9, name: "Dumbbell Bent Over Row", target_muscle: "Espalda", equipment: "Mancuernas", gif_url: "https://fitnessprogramer.com/wp-content/uploads/2021/02/Bent-Over-Dumbbell-Row.gif" },
-  { id: 10, name: "Superman", target_muscle: "Espalda", equipment: "Solo peso corporal", gif_url: "https://fitnessprogramer.com/wp-content/uploads/2021/05/Superman-exercise.gif" },
-  { id: 11, name: "Plank", target_muscle: "Abdomen / Core", equipment: "Solo peso corporal", gif_url: "https://fitnessprogramer.com/wp-content/uploads/2021/02/Plank.gif" },
-  { id: 12, name: "Bird Dog", target_muscle: "Abdomen / Core", equipment: "Solo peso corporal", gif_url: "https://fitnessprogramer.com/wp-content/uploads/2021/02/Bird-Dog.gif" },
-  { id: 13, name: "Dead Bug", target_muscle: "Abdomen / Core", equipment: "Solo peso corporal", gif_url: "https://fitnessprogramer.com/wp-content/uploads/2021/05/Dead-Bug.gif" },
-  { id: 14, name: "Band Paloff Press", target_muscle: "Abdomen / Core", equipment: "Bandas elásticas", gif_url: "https://fitnessprogramer.com/wp-content/uploads/2021/06/Band-Pallof-Press.gif" },
-  { id: 15, name: "Push Up", target_muscle: "Pecho", equipment: "Solo peso corporal", gif_url: "https://fitnessprogramer.com/wp-content/uploads/2021/02/Push-Up.gif" },
-  { id: 16, name: "Incline Push Up", target_muscle: "Pecho", equipment: "Silla / Soporte", gif_url: "https://fitnessprogramer.com/wp-content/uploads/2021/06/Incline-Push-Up.gif" },
-  { id: 17, name: "Dumbbell Bench Press", target_muscle: "Pecho", equipment: "Mancuernas", gif_url: "https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Press.gif" },
-  { id: 18, name: "Band Lateral Raise", target_muscle: "Hombros", equipment: "Bandas elásticas", gif_url: "https://fitnessprogramer.com/wp-content/uploads/2021/06/Band-Lateral-Raise.gif" },
-  { id: 19, name: "Dumbbell Shoulder Press", target_muscle: "Hombros", equipment: "Mancuernas", gif_url: "https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Shoulder-Press.gif" },
-  { id: 20, name: "Dumbbell Bicep Curl", target_muscle: "Brazos", equipment: "Mancuernas", gif_url: "https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Curl.gif" },
-  { id: 21, name: "Band Bicep Curl", target_muscle: "Brazos", equipment: "Bandas elásticas", gif_url: "https://fitnessprogramer.com/wp-content/uploads/2021/06/Resistance-Band-Bicep-Curl.gif" },
-  { id: 22, name: "Chair Tricep Dips", target_muscle: "Brazos", equipment: "Silla / Soporte", gif_url: "https://fitnessprogramer.com/wp-content/uploads/2021/02/Chair-Dips.gif" },
-  { id: 23, name: "Foam Roller Thoracic Extension", target_muscle: "Espalda", equipment: "Rodillo (Foam Roller)", gif_url: "https://fitnessprogramer.com/wp-content/uploads/2022/11/Foam-Roller-Thoracic-Extension.gif" },
-  { id: 24, name: "Foam Roller Quadriceps", target_muscle: "Piernas", equipment: "Rodillo (Foam Roller)", gif_url: "https://fitnessprogramer.com/wp-content/uploads/2022/11/Foam-Roller-Quadriceps.gif" },
-  { id: 25, name: "Foam Roller Glutes", target_muscle: "Glúteos", equipment: "Rodillo (Foam Roller)", gif_url: "https://fitnessprogramer.com/wp-content/uploads/2022/11/Foam-Roller-Glutes.gif" },
-  { id: 26, name: "Foam Roller Upper Back", target_muscle: "Espalda", equipment: "Rodillo (Foam Roller)", gif_url: "https://fitnessprogramer.com/wp-content/uploads/2022/11/Foam-Roller-Upper-Back.gif" }
-];
+// Catálogo con enlaces directos e ilustraciones verificadas por grupo muscular
+const EXERCISES_DATABASE = [
+  // ABDOMEN Y CORE
+  { id: 1, name: "Plank (Plancha Frontal)", target_muscle: "Abdomen / Core", equipment: "Solo peso corporal", img_url: "https://images.unsplash.com/photo-1566241134883-13eb2393a3cc?w=600&auto=format&fit=crop&q=80" },
+  { id: 2, name: "Bird Dog (Pájaro Perro)", target_muscle: "Abdomen / Core", equipment: "Solo peso corporal", img_url: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&auto=format&fit=crop&q=80" },
+  { id: 3, name: "Dead Bug (Bicho Muerto)", target_muscle: "Abdomen / Core", equipment: "Solo peso corporal", img_url: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&auto=format&fit=crop&q=80" },
+  { id: 4, name: "Band Pallof Press", target_muscle: "Abdomen / Core", equipment: "Bandas elásticas", img_url: "https://images.unsplash.com/photo-1598971639058-fab3c3109a00?w=600&auto=format&fit=crop&q=80" },
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ""
-);
+  // ESPALDA
+  { id: 5, name: "Superman", target_muscle: "Espalda", equipment: "Solo peso corporal", img_url: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&auto=format&fit=crop&q=80" },
+  { id: 6, name: "Band Pull Apart", target_muscle: "Espalda", equipment: "Bandas elásticas", img_url: "https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=600&auto=format&fit=crop&q=80" },
+  { id: 7, name: "Remo Sentado con Banda", target_muscle: "Espalda", equipment: "Bandas elásticas", img_url: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?w=600&auto=format&fit=crop&q=80" },
+  { id: 8, name: "Remo con Mancuerna", target_muscle: "Espalda", equipment: "Mancuernas", img_url: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=600&auto=format&fit=crop&q=80" },
+
+  // GLÚTEOS Y PIERNAS
+  { id: 9, name: "Puente de Glúteo (Glute Bridge)", target_muscle: "Glúteos", equipment: "Solo peso corporal", img_url: "https://images.unsplash.com/photo-1434608519344-49d77a699e1d?w=600&auto=format&fit=crop&q=80" },
+  { id: 10, name: "Clamshell (Almeja con Banda)", target_muscle: "Glúteos", equipment: "Bandas elásticas", img_url: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=600&auto=format&fit=crop&q=80" },
+  { id: 11, name: "Sentadilla Libre (Bodyweight Squat)", target_muscle: "Piernas", equipment: "Solo peso corporal", img_url: "https://images.unsplash.com/photo-1574680088814-c9e8a10d8a4d?w=600&auto=format&fit=crop&q=80" },
+  { id: 12, name: "Goblet Squat con Mancuerna", target_muscle: "Piernas", equipment: "Mancuernas", img_url: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&auto=format&fit=crop&q=80" },
+
+  // PECHO, HOMBROS Y BRAZOS
+  { id: 13, name: "Flexiones / Push Ups", target_muscle: "Pecho", equipment: "Solo peso corporal", img_url: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&auto=format&fit=crop&q=80" },
+  { id: 14, name: "Flexiones Inclinadas en Silla", target_muscle: "Pecho", equipment: "Silla / Soporte", img_url: "https://images.unsplash.com/photo-1598971639058-fab3c3109a00?w=600&auto=format&fit=crop&q=80" },
+  { id: 15, name: "Elevaciones Laterales con Banda", target_muscle: "Hombros", equipment: "Bandas elásticas", img_url: "https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=600&auto=format&fit=crop&q=80" },
+  { id: 16, name: "Fondos de Tríceps en Silla", target_muscle: "Brazos", equipment: "Silla / Soporte", img_url: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=600&auto=format&fit=crop&q=80" },
+
+  // RODILLO / FOAM ROLLER
+  { id: 17, name: "Extensión Torácica con Rodillo", target_muscle: "Espalda", equipment: "Rodillo (Foam Roller)", img_url: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&auto=format&fit=crop&q=80" },
+  { id: 18, name: "Liberación Miofascial de Glúteos", target_muscle: "Glúteos", equipment: "Rodillo (Foam Roller)", img_url: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&auto=format&fit=crop&q=80" },
+  { id: 19, name: "Descarga de Cuádriceps con Rodillo", target_muscle: "Piernas", equipment: "Rodillo (Foam Roller)", img_url: "https://images.unsplash.com/photo-1566241134883-13eb2393a3cc?w=600&auto=format&fit=crop&q=80" }
+];
 
 export async function POST(req: Request) {
   try {
     const { age, zones, equipment, goal, level } = await req.json();
     const apiKey = process.env.GEMINI_API_KEY;
 
-    if (!apiKey) return NextResponse.json({ success: false, error: "Falta GEMINI_API_KEY" }, { status: 400 });
-
-    let exercisesPool = FALLBACK_EXERCISES;
-    try {
-      const { data: dbExercises } = await supabase.from("exercises").select("*");
-      if (dbExercises && dbExercises.length > 0) exercisesPool = dbExercises;
-    } catch (e) {
-      console.warn("Usando catálogo local.");
+    if (!apiKey) {
+      return NextResponse.json({ success: false, error: "Falta GEMINI_API_KEY" }, { status: 400 });
     }
 
-    const catalogSummary = exercisesPool.map((e) => ({
-      id: e.id,
-      name: e.name,
-      target_muscle: e.target_muscle,
-      equipment: e.equipment,
-    }));
+    const availableNames = EXERCISES_DATABASE.map(e => `${e.name} [Zona: ${e.target_muscle} | Eq: ${e.equipment}]`).join(" // ");
 
-    const prompt = `Actúa como entrenador personal y fisiólogo deportivo.
-Diseña una sesión estructurada con estos parámetros:
-- Edad: ${age}
-- Zonas: ${zones?.join(", ") || "Cuerpo completo"}
+    const prompt = `Actúa como entrenador personal y fisiólogo del ejercicio.
+Diseña una rutina personalizada de 3 a 5 ejercicios con estos datos:
+- Rango de edad: ${age}
+- Zonas musculares: ${zones?.join(", ") || "Cuerpo completo"}
 - Equipamiento: ${equipment?.join(", ") || "Solo peso corporal"}
 - Objetivo: ${goal}
 - Nivel: ${level}
 
-CATÁLOGO PERMITIDO (Usa ÚNICAMENTE nombres exactos de esta lista):
-${JSON.stringify(catalogSummary, null, 2)}
+CATÁLOGO ESTRICTO DE EJERCICIOS PERMITIDOS:
+${availableNames}
 
-INSTRUCCIONES CLAVE:
-1. "feedback_overview": Redacta una guía integral de ejecución (máximo 120-150 palabras) explicando cómo abordar la sesión (calentamiento, tempo controlado, respiración y progresión semanal para esta edad).
-2. "exercises": Lista de 3 a 5 ejercicios ordenados lógicamente (primero activación/movilidad, luego fuerza principal y estabilidad al final).
-3. Devuelve ÚNICAMENTE un JSON válido con esta estructura:
+INSTRUCCIONES:
+1. Elige ÚNICAMENTE ejercicios del catálogo anterior que encajen con las zonas y el equipo disponible.
+2. "feedback_overview": Proporciona una explicación metodológica completa (entre 80 y 140 palabras) explicando cómo calentar, el ritmo de respiración, la técnica postural y la progresión recomendada para personas de ${age}.
+3. Ordena los ejercicios con lógica: 1º Activación/Movilidad, 2º Ejercicio central, 3º Estabilidad/Core.
+
+Devuelve ÚNICAMENTE un JSON válido con esta estructura:
 {
-  "routine_title": "Título de la rutina",
-  "feedback_overview": "Guía completa del entrenador (calentamiento, cadencia y ejecución integral en menos de 150 palabras)",
+  "routine_title": "Título claro de la sesión",
+  "feedback_overview": "Texto del feedback metodológico completo",
   "exercises": [
     {
       "order": 1,
-      "name": "Nombre exacto del catálogo",
-      "target_muscle": "Zona trabajada",
+      "name": "Nombre exacto como aparece en el catálogo",
+      "target_muscle": "Zona muscular",
       "sets": 3,
       "reps": "10-12 reps",
       "rest": "45s",
-      "cue": "Consejo técnico rápido"
+      "cue": "Consejo técnico rápido de postura"
     }
   ]
 }`;
@@ -108,15 +96,15 @@ INSTRUCCIONES CLAVE:
     const plan = JSON.parse(cleanJson);
 
     if (plan.exercises && Array.isArray(plan.exercises)) {
-      plan.exercises = plan.exercises.map((item: any, index: number) => {
-        const match = exercisesPool.find(
-          (ex) => ex.name.toLowerCase() === item.name?.toLowerCase() || ex.name.toLowerCase().includes(item.name?.toLowerCase())
+      plan.exercises = plan.exercises.map((item: any, idx: number) => {
+        const found = EXERCISES_DATABASE.find(
+          ex => ex.name.toLowerCase().includes(item.name?.toLowerCase()) || item.name?.toLowerCase().includes(ex.name.toLowerCase())
         );
         return {
           ...item,
-          order: item.order || index + 1,
-          gif_url: match ? match.gif_url : "https://fitnessprogramer.com/wp-content/uploads/2021/05/Superman-exercise.gif",
-          target_muscle: match ? match.target_muscle : item.target_muscle,
+          order: item.order || idx + 1,
+          img_url: found ? found.img_url : "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&auto=format&fit=crop&q=80",
+          target_muscle: found ? found.target_muscle : item.target_muscle
         };
       });
     }

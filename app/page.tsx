@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 const BODY_ZONES = ["Piernas", "Glúteos", "Espalda", "Pecho", "Hombros", "Brazos", "Abdomen / Core", "Cuerpo Completo"];
 const EQUIPMENT_OPTIONS = ["Bandas elásticas", "Rodillo (Foam Roller)", "Mancuernas", "Silla / Soporte", "Solo peso corporal", "Gimnasio completo"];
 const AGE_OPTIONS = ["+40 años", "+50 años", "+60 años", "+70 años"];
-const FALLBACK_GIF = "https://fitnessprogramer.com/wp-content/uploads/2021/05/Dead-Bug.gif";
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -266,19 +265,15 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Lista de ejercicios */}
+              {/* Lista de ejercicios con imágenes individuales */}
               <div className="space-y-4">
                 {currentPlan.exercises?.map((ex: any) => (
                   <div key={ex.order} className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-xl">
-                    <div className="bg-white flex items-center justify-center p-2 min-h-[190px]">
+                    <div className="bg-zinc-950 flex items-center justify-center p-2 min-h-[190px] border-b border-zinc-800/60">
                       <img 
-                        src={ex.gif_url} 
+                        src={ex.img_url} 
                         alt={ex.name} 
-                        referrerPolicy="no-referrer"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = FALLBACK_GIF;
-                        }}
-                        className="h-48 object-contain" 
+                        className="h-48 w-full object-cover rounded-xl" 
                       />
                     </div>
                     <div className="p-4">
@@ -350,13 +345,9 @@ export default function Home() {
                   {saved.exercises?.map((ex: any) => (
                     <div key={ex.order || ex.name} className="bg-zinc-950 p-3 rounded-xl border border-zinc-800 flex gap-3 items-center">
                       <img 
-                        src={ex.gif_url} 
+                        src={ex.img_url} 
                         alt={ex.name} 
-                        referrerPolicy="no-referrer"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = FALLBACK_GIF;
-                        }}
-                        className="w-16 h-16 bg-white object-contain rounded-lg flex-shrink-0" 
+                        className="w-16 h-16 object-cover rounded-lg flex-shrink-0" 
                       />
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-sm truncate">
